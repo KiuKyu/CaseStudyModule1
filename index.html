@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="target.js"></script>
+    <style>
+        canvas {
+            display: block;
+            cursor: crosshair;
+            border: 1px solid black;
+            background: url("img/background3.gif");
+            background-repeat: no-repeat;
+        }
+
+        #score {
+            font-size: 25px;
+            color: blue;
+        }
+    </style>
+    <script src="crosshair.js"></script>
+</head>
+<body>
+    <canvas id="myCanvas" width="500" height="500"></canvas>
+    <br>
+    <p id="testCoor"></p>
+    <p id="score">Score: 0</p>
+    <input type="button" value="Play Again ?" onclick="location.reload()">
+</body>
+<script>
+    let canvas = document.getElementById('myCanvas');
+    let ctx = canvas.getContext('2d');
+    let terrorist = new Target(50, 50, 50, 50, 'img/thief.png');
+    let chicken = new Target(150, 50, 50, 50, 'img/chicken.png');
+    let citizenM = new Target(250, 50, 50, 50, 'img/man.png');
+    let citizenW = new Target(350, 50, 50, 50, 'img/woman.png');
+    let crosshair = new Crosshair(0, 0, 25, 25, 'img/crosshair.png');
+    terrorist.drawTarget(ctx);
+    chicken.drawTarget(ctx);
+    citizenM.drawTarget(ctx);
+    citizenW.drawTarget(ctx);
+    crosshair.drawCrosshair(ctx);
+
+    // coordinate
+    let xAxis;
+    let yAxis;
+    let score = 0;
+
+    // Func update canvas
+    function updateCanvas() {
+        clearCanvas();
+        chicken.drawTarget(ctx);
+        terrorist.drawTarget(ctx);
+        citizenM.drawTarget(ctx);
+        citizenW.drawTarget(ctx);
+    }
+
+    // tạo func 'hiện target'
+    function showTarget() {
+        terrorist.locateTarget();
+        chicken.locateTarget();
+        citizenM.locateTarget();
+        citizenW.locateTarget();
+        updateCanvas();
+    }
+
+    // Đặt thời gian xuất hiện của target
+    let sTime = setInterval(showTarget, 500);
+
+    // Func lấy tọa độ chuột
+    function getMouseCoor(event) {
+        xAxis = event.clientX; // clientX để lấy tọa độ X;
+        yAxis = event.clientY; // clientY để lấy tọa độ Y;
+        document.getElementById('testCoor').innerHTML = 'Coor: ' + xAxis + ', ' + yAxis; // in ra tọa độ
+    }
+
+    // function crosshairCoor() {
+    //     canvas.addEventListener('mousemove', function (event) {
+    //         getMouseCoor(event);
+    //     });
+    //     crosshair.drawCrosshair(ctx);
+    //     crosshair.x = xAxis;
+    //     crosshair.y = yAxis;
+    //     updateCanvas();
+    // }
+    //
+    // crosshairCoor();
+    // Func tính điểm khi bắn trúng
+    function hitSuccess() {
+        // Chicken hit
+        if (xAxis < chicken._x + chicken._width && xAxis > chicken._x - chicken._width) {
+            if (yAxis < chicken._y + chicken._height && yAxis > chicken._y - chicken._height) {
+                score += 10;
+                document.getElementById('score').innerHTML = 'Score: ' + score;
+            }
+        }
+
+        // Man hit
+        if (xAxis < citizenM._x + citizenM._width && xAxis > citizenM._x - citizenM._width) {
+            if (yAxis < citizenM._y + citizenM._height && yAxis > citizenM._y - citizenM._height) {
+                // citizenM._src = 'img/explosion.png';
+                endGame();
+            }
+        }
+
+        // Terrorist hit
+        if (xAxis < terrorist._x + terrorist._width && xAxis > terrorist._x - terrorist._width) {
+            if (yAxis < terrorist._y + terrorist._height && yAxis > terrorist._y - terrorist._height) {
+                // terrorist._src = 'img/explosion.png';
+                score+= 10;
+                document.getElementById('score').innerHTML = 'Score: ' + score;
+            }
+        }
+
+        // Woman hit
+        if (xAxis < citizenW._x + citizenW._width && xAxis > citizenW._x - citizenW._width) {
+            if (yAxis < citizenW._y + citizenW._height && yAxis > citizenW._y - citizenW._height) {
+                // citizenM._src = 'img/explosion.png';
+                endGame();
+            }
+        }
+    }
+
+    function clearCoor() {
+        document.getElementById('testCoor').innerHTML = '';
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, 500, 500);
+    }
+
+    function endGame() {
+        ctx.clearRect(0, 0, 500, 500);
+        clearInterval(sTime);
+        canvas.style.background = 'black';
+        ctx.font = '50px Arial';
+        ctx.fillStyle = 'red';
+        ctx.fillText('Game Over', 120, 260);
+    }
+
+    document.getElementById('myCanvas').addEventListener('mousemove', getMouseCoor);
+    document.getElementById('myCanvas').addEventListener('mouseout', clearCoor);
+    document.getElementById('myCanvas').addEventListener('mousedown', hitSuccess);
+</script>
+</html>
